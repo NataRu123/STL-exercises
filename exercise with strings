@@ -1,0 +1,219 @@
+/*
+The strange program which has to make the following:
+1.To read contents of the text file. The file may contain:
+a.	Words – consist of Latin lower case, capital letters, and also numbers
+b.	Punctuation marks – «.», «,» «!» «?» «:» «;»
+c.	Space, tabulation, symbol of a new line.
+
+2.	To format the text as follows:
+a.	There must be no whitespace characters other than a space
+b.	It should not go more than one space in a row
+c.	Between word and punctuation mark must not be space
+d.	After a punctuation mark always there has to be a space
+e.	Words longer than 10 characters are replaced by the word «Vau!»
+
+3.	To transform the received text to a set of lines, each of which contains the whole quantity of lines 
+(the word has to be entirely in line) and it it is long doesn't exceed 40 symbols.
+*/
+#include <iostream>
+#include <conio.h>
+#include <stdio.h>
+#include <string>
+#include <vector>
+using namespace std;
+
+string openandread(char* NameOfFile)//Function for opening of file "NameOfFile",for reading the information and creating string with it.
+{
+	FILE *stream1;
+	char vh[1];
+	if ((fopen_s(&stream1, NameOfFile, "r")) == 5)//Check of opening of file
+		printf("The file was not opened\n");
+	else
+	{
+		printf("The file was opened\n");
+	}
+	string z;
+	while (fread(&vh, sizeof(char), 1, stream1))//Reading a symbol 
+	{
+		z.push_back(vh[0]);//Adding of symbol at the end of string
+	}
+	fclose(stream1);//Closing of file
+	return z;
+}
+string format(string z) //Function for formating of string
+{
+	int s = z.size();
+	int i = 0;
+	while (i != string::npos)//Erasing symbols of the string's end
+	{
+		i = z.find('\n');
+		if (i != string::npos)
+			z.erase(i, 1);
+		s = z.size();
+	}
+	i = 0;
+	while (i != string::npos)//Erasing tabulation
+	{
+		i = z.find('\t');
+		if (i != string::npos)
+			z.at(i) = ' ';
+	}
+	i = 0;
+	while (i<s)//Erasing double spacing
+	{
+		i = z.find(' ', i);
+		if (i == string::npos) break;
+		if (i == s - 1)
+		{
+			z.erase(i, 1);
+			break;
+		}
+		if (z.at(i + 1) == ' ')
+		{
+			z.erase(i + 1, 1);
+			i = 0;
+			s = z.size();
+		}
+		else
+			i = i + 1;
+	}
+	i = 0;
+	while (i<s)//Formating punctuation marks
+	{
+		i = z.find_first_of(".\,\!\?\:\;", i);
+		if (i == string::npos) break;
+		if (i == s - 1) break;
+		if (i == 0)
+		{
+			if (z.at(1) != ' ')
+			{
+				z.insert(1, " ");
+				s = z.size();
+				i = i + 1;
+				continue;
+			}
+			else
+			{
+				i = i + 1;
+				continue;
+			}
+		}
+		if (z.at(i - 1) == ' ')
+		{
+			z.erase(i - 1, 1);
+			s = z.size();
+			i = i - 1;
+		}
+		if (z.at(i + 1) != ' ')
+		{
+			z.insert(i + 1, " ");
+			s = z.size();
+			i = i + 1;
+		}
+		else
+			i = i + 1;
+	}
+	string x = z;
+	return x;
+}
+string vau(string z)//Replacement of strings with more than 10 symbols on "Vau!"
+{
+	int i = 0;
+	while (i < z.size())
+	{
+		i = z.find_first_not_of(" ", i);//Finding first of no space symbol
+		int n = 1;
+		if (i == string::npos)// Checking of existence of such symbol
+			break;
+		if (i > z.size() - 10)//Checking of the end of string
+			break;
+		i = i + 1;
+		//Definition of size of the word
+		while ((z.at(i) != ' ') & (z.at(i) != ',') & (z.at(i) != '.') & (z.at(i) != ':')& (z.at(i) != '?') & (z.at(i) != '!') & (z.at(i) != ';'))
+		{
+			n = n + 1;
+			if (i < z.size() - 1)
+				i = i + 1;
+			else
+				break;
+		}
+		if (n >= 10)//Replacement
+		{
+			z.replace(i - n, n, "Vau!");
+			i = i - n + 3;
+		}
+	}
+	string x = z;
+	return x;
+}
+vector<string> transform(string z)//Transforming of string to vector of strings
+{
+	int n = 0,y=0,e=0,i=0;
+	vector<string> r;
+	while (i< z.size())//Cycle for transformation of string to vector of strings: elements of vector - single words of string
+	{
+		e= z.find_first_not_of(' ',i);
+		if (e == string::npos)
+			break;
+		y = z.find_first_of(' ', e + 1);
+		if (y == string::npos)
+		{
+			string x = z.substr(e, z.size() - e);
+			r.push_back(x);
+			break;
+		}
+		else
+		{
+			string x = z.substr(e, y - e);
+			r.push_back(x);
+			i = y + 1;
+		}
+	}
+	i = 1;
+	vector<string> v;
+	while (i < r.size())//Cycle for transformation of vector of words to vector of strings
+	{
+		n = r.at(i-1).size() + 1;
+		e = i - 1;
+		while (n < 40)
+		{
+			try
+			{
+			    n = n + r.at(i).size()+1;
+				i = i + 1;
+			}
+			catch (out_of_range)
+			{
+				string n1=r.at(e)+' ';
+				for (int j = e + 1; j < r.size(); j++)
+					n1 = n1 + r.at(j)+' ';
+				v.push_back(n1);
+				i = r.size();
+				break;
+			}
+		}
+		if (i < r.size())
+		{
+			string n1 = r.at(e) + ' ';
+			for (int j = e + 1; j < i - 1; j++)
+				n1 = n1 + r.at(j) + ' ';
+			v.push_back(n1);
+		}
+	}
+	return v;
+}
+int main(void)
+{
+	string St;
+	St = openandread("d11");
+	cout << St << endl;
+	string Stf;
+	Stf = format(St);
+	cout << Stf << endl;
+	St = vau(Stf);
+	cout << St << endl;
+	vector<string> Res = transform(St);
+	cout << "----------------------"<< endl;
+	for (int i = 0; i < Res.size();i++)
+	cout << Res[i]<<"|||"<<Res[i].size()<<endl;
+}
