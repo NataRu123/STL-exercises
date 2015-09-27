@@ -1,0 +1,113 @@
+//Experience with different methods of appealing to vector's elements: [], .at() and with helping of iterators.
+
+#include <vector>
+#include <iostream>
+#include <conio.h>
+#include <math.h>
+#include <iomanip>
+#include < time.h >
+using namespace std;
+double random1(void)//Function returns random number in interval [-1;1]
+{
+	double v;
+	int r;
+	r = rand();
+	if (r < 320)
+		v = (pow((-1.0), r)*r) / 320;
+	else
+		v = (pow((-1.0), r)*r) / RAND_MAX;
+	return v;
+}
+vector<double> nov(int size)// Create new vector of random numbers in interval [-1;1]
+{
+	vector<double> M(size);
+	for (int i = 0; i < size; i++)
+		M[i] = random1();
+	return M;
+}
+vector<double> sort1(vector<double> vh)//Sort with .at()
+{
+	try
+	{
+		int q = 1;
+		q = vh.size();
+		double temp = 1;
+		int i = 0;
+		while (i < (q - 1))
+		{
+			if (vh.at(i) > vh.at(i + 1))
+			{
+				temp = vh.at(i + 1);
+				vh.at(i + 1) = vh.at(i);
+				vh.at(i) = temp;
+				i = 0;
+			}
+			else
+				i = i++;
+		}
+		return vh;
+	}
+	catch (out_of_range)
+	{
+		cout << "Out of range";
+	}
+}
+vector<double> sort2(vector<double> vh)//Sort vector with []
+{
+	int q = 1;
+	q = vh.size();
+	double temp = 1;
+	int i = 0;
+	while (i<(q - 1))
+	{
+		if (vh[i] > vh[i + 1])
+		{
+			temp = vh[i + 1];
+			vh[i + 1] = vh[i];
+			vh[i] = temp;
+			i = 0;
+		}
+		else
+			i = i++;
+	}
+	return vh;
+}
+vector<double> sort3(vector<double> vh)//Sort with iterators
+{
+	vector<double>::iterator i;
+	i = vh.begin();
+	double temp = 0;
+	vector<double>::iterator e;
+	e = vh.end() - 1;
+	while (i != e)
+	{
+		if (*i>*(i + 1))
+		{
+			temp = *(i + 1);
+			*(i + 1) = *i;
+			*i = temp;
+			i = vh.begin();
+		}
+		else
+			i = i + 1;
+	}
+	return vh;
+}
+void main(void)
+{
+		vector<double> exp1;
+		exp1 = nov(330);
+		vector<double> exp2;
+		long int ttime1 = time(NULL);
+		exp2 = sort1(exp1);
+		long int ttime2 = time(NULL);
+		cout<<"Operation time of sorting with .at():"<<ttime2 - ttime1<<endl;
+		long int ttime1 = time(NULL);
+		exp2 = sort2(exp1);
+		long int ttime2 = time(NULL);
+		cout<<"Operation time of sorting with []:"<<ttime2 - ttime1<<endl;
+		long int ttime1 = time(NULL);
+		exp2 = sort3(exp1);
+		long int ttime2 = time(NULL);
+		cout<<"Operation time of sorting with iterators:"<<ttime2 - ttime1<<endl;
+}
